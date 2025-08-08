@@ -103,4 +103,5 @@ def save_doc():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    debug_mode = os.getenv('FLASK_DEBUG', 'false').lower() in ('1', 'true', 't', 'yes')
+    app.run(debug=debug_mode)
