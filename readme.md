@@ -1,6 +1,6 @@
 # Secure Text Editor
 
-A basic privacy‑focused text editor that stores documents encoded in a SQLite database. Each document is protected by a file name and password pair.
+A basic privacy‑focused text editor that stores documents encoded in a SQLite database. Each document is protected by a file name and password pair. Keys are derived using Argon2 with a unique random salt per file.
 
 ## Features
 - Create or open documents using a file name and password.
