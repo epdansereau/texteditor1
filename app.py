@@ -6,6 +6,8 @@ from cryptography.fernet import Fernet, InvalidToken
 
 app = Flask(__name__)
 DB_PATH = 'documents.db'
+# Token used for dummy decrypts to keep timing consistent.
+DUMMY_TOKEN = Fernet(Fernet.generate_key()).encrypt(b'0')
 
 
 def get_db():
@@ -40,16 +42,25 @@ def open_doc():
     cur.execute('SELECT content FROM documents WHERE filename=?', (filename,))
     row = cur.fetchone()
     conn.close()
-    if not row:
-        # New document
-        return jsonify({'content': ''})
+
     key = derive_key(filename, password)
     f = Fernet(key)
+    token = row[0] if row else DUMMY_TOKEN
+
+    content = ""
     try:
-        decrypted = f.decrypt(row[0]).decode()
+        content = f.decrypt(token).decode()
     except InvalidToken:
-        return jsonify({'error': 'Invalid file name or password'}), 403
-    return jsonify({'content': decrypted})
+        pass
+
+    # Dummy decrypt to keep timing consistent whether the document exists or
+    # the password is wrong.
+    try:
+        f.decrypt(DUMMY_TOKEN)
+    except InvalidToken:
+        pass
+
+    return jsonify({'content': content})
 
 
 @app.post('/api/save')
